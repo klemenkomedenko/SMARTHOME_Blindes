@@ -1,0 +1,4 @@
+[submodule "open-logic"]
+	path = open-logic
+	url = git@github.com:open-logic/open-logic.git
+        branch = main
