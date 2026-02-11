@@ -7,16 +7,23 @@ entity top is
     generic (
         g_CLK_FREQ    : integer := 30_000_000; --! Define clock frequency 30 MHz 
         g_BAUD_RATE   : integer := 1_000_000;  --! BAUDRATE of UART protocole 1 Mbps
-        g_BEAT_FREQ   : integer := 1_000  --! Beat frequency for PWM timing control 1 kHz
+        g_BEAT_FREQ   : integer := 1_000;  --! Beat frequency for PWM timing control 1 kHz
+        g_N_BLINDS     : integer := 11; --! Number of blinds in the system
+        g_N_ON_OFF     : integer := 5; --! Number of blinds in the system
+        g_timer : integer := 100; --! Default timer value for timing operations
+        g_dly_timer : integer := 50 --! Default timer value for delay operations
     );
     port (
-        i_clk   : in std_logic;
-        i_rst : in std_logic;
+        i_clk   : in std_logic; --! Input clock signal for the system
+        i_rst : in std_logic; --! Active high reset signal to initialize the system
 
-        i_rx : in std_logic;
-        o_tx : out std_logic;
+        i_rx : in std_logic; --! Input signal for UART reception, used to receive data from an external device such as a microcontroller or computer
+        o_tx : out std_logic; --! Output signal for UART transmission, used to send data to an external device such as a microcontroller or computer
 
-        o_pwm : out std_logic_vector(63 downto 0)
+        o_relay_up : out std_logic_vector(g_N_BLINDS-1 downto 0); --! Output signal vector to control the up state of the blinds, each bit corresponds to a blind
+        o_relay_down : out std_logic_vector(g_N_BLINDS-1 downto 0); --! Output signal vector to control the down state of the blinds, each bit corresponds to a blind
+
+        o_on_off : out std_logic_vector(g_N_ON_OFF-1 downto 0) --! Output signal vector to control the on/off state of the relay lights, each bit corresponds to a relay light
         
     );
 end entity top;
@@ -32,6 +39,8 @@ architecture rtl of top is
     signal s_we : std_logic;
     signal s_wdata : std_logic_vector(7 downto 0);
     signal s_rdata : std_logic_vector(7 downto 0);
+    type t_rdata_array is array (0 to (g_N_BLINDS + g_N_ON_OFF)-1) of std_logic_vector(7 downto 0);
+    signal s_rdata_array : t_rdata_array;
 
     signal s_init_dim : std_logic_vector(15 downto 0);
     signal s_en_pwm : std_logic_vector(63 downto 0);
@@ -73,33 +82,60 @@ begin
         i_uart_tx_busy => s_tx_busy
     );
 
-    reg_inst : entity work.reg
-    port map (
-        i_clk => i_clk,
-        i_rst => i_rst,
-        i_addr => s_addr,
-        i_we => s_we,
-        i_wdata => s_wdata,
-        o_rdata => s_rdata,
-        o_init_dim => s_init_dim,
-        o_en_pwm => s_en_pwm,
-        o_inc_pwm => s_inc_pwm,
-        o_dec_pwm => s_dec_pwm
-    );
 
-    gen_pwm : for i in 0 to 63 generate
-        pwm_inst : entity work.pwm
+
+    gen_blinds : for i in 0 to g_N_BLINDS-1 generate
+        blinds_inst : entity work.blinds
+        generic map (
+            g_timer => g_timer,
+            g_dly_timer => g_dly_timer,
+            N_BASE_ADDR => i*5
+        )
         port map (
             i_clk => i_clk,
             i_rst => i_rst,
-            i_beat => s_beat,
-            i_init_dim => s_init_dim(7 downto 0),
-            i_en_pwm => s_en_pwm(i),
-            i_inc_pwm => s_inc_pwm(i),
-            i_dec_pwm => s_dec_pwm(i),
-            o_pwm => o_pwm(i)
+            i_addr => s_addr,
+            i_we => s_we,
+            i_wdata => s_wdata,
+            o_rdata => s_rdata_array(i),
+            o_relay_up => o_relay_up(i),
+            o_relay_down => o_relay_down(i)
         );
     end generate;
+
+    gen_on_off : for i in 0 to g_N_ON_OFF-1 generate
+
+    reley_lights_inst : entity work.reley_lights
+        port map (
+            i_clk => i_clk,
+            i_rst => i_rst,
+            i_addr => s_addr,
+            i_we => s_we,
+            i_wdata => s_wdata,
+            o_rdata => s_rdata_array(i + g_N_BLINDS),
+            o_on_off => o_on_off(i)
+        );
+
+    end generate;
+
+
+    s_rdata <= s_rdata_array(0) when s_addr >= std_logic_vector(to_unsigned(0, 8)) and s_addr < std_logic_vector(to_unsigned(5, 8)) else
+               s_rdata_array(1) when s_addr >= std_logic_vector(to_unsigned(5, 8)) and s_addr < std_logic_vector(to_unsigned(10, 8)) else
+               s_rdata_array(2) when s_addr >= std_logic_vector(to_unsigned(10, 8)) and s_addr < std_logic_vector(to_unsigned(15, 8)) else
+               s_rdata_array(3) when s_addr >= std_logic_vector(to_unsigned(15, 8)) and s_addr < std_logic_vector(to_unsigned(20, 8)) else
+               s_rdata_array(4) when s_addr >= std_logic_vector(to_unsigned(20, 8)) and s_addr < std_logic_vector(to_unsigned(25, 8)) else
+               s_rdata_array(5) when s_addr >= std_logic_vector(to_unsigned(25, 8)) and s_addr < std_logic_vector(to_unsigned(30, 8)) else
+               s_rdata_array(6) when s_addr >= std_logic_vector(to_unsigned(30, 8)) and s_addr < std_logic_vector(to_unsigned(35, 8)) else
+               s_rdata_array(7) when s_addr >= std_logic_vector(to_unsigned(35, 8)) and s_addr < std_logic_vector(to_unsigned(40, 8)) else
+               s_rdata_array(8) when s_addr >= std_logic_vector(to_unsigned(40, 8)) and s_addr < std_logic_vector(to_unsigned(45, 8)) else
+               s_rdata_array(9) when s_addr >= std_logic_vector(to_unsigned(45, 8)) and s_addr < std_logic_vector(to_unsigned(50, 8)) else
+               s_rdata_array(10) when s_addr >= std_logic_vector(to_unsigned(50, 8)) and s_addr < std_logic_vector(to_unsigned(55, 8)) else
+               s_rdata_array(11) when s_addr = std_logic_vector(to_unsigned(55, 8)) else
+               s_rdata_array(12) when s_addr = std_logic_vector(to_unsigned(56, 8)) else
+               s_rdata_array(13) when s_addr = std_logic_vector(to_unsigned(57, 8)) else
+               s_rdata_array(14) when s_addr = std_logic_vector(to_unsigned(58, 8)) else
+               s_rdata_array(15) when s_addr = std_logic_vector(to_unsigned(59, 8)) else
+               (others => '0');
 
     beat_inst : entity work.beat
     generic map (
