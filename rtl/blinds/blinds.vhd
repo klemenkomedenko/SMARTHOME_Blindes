@@ -44,7 +44,9 @@ architecture rtl of blinds is
                   DOWN_WAIT, --! Blinds are closing
                   DOWN_FULLY_CLOSED, --! Blinds are fully closed
                   DOWN_USER_CLOSED, --! Blinds are closing by user command
-                  DOWN_USER_STALL --! Blinds are stopped while closing by user command
+                  DOWN_USER_STALL, --! Blinds are stopped while closing by user command
+                  UP_FULLY_OPEN_NOT, --! Blinds are fully open but not initialized
+                  UP_FULLY_CLOSED_NOT --! Blinds are fully closed but not initialized
                   ); --! Blinds are stopped
     signal s_fsm, r_fsm : t_fsm := IDLE;
 
@@ -92,7 +94,7 @@ begin
         end if;
     end process p_fsm_synch;
 
-    p_fsm : process(r_fsm, s_init_en, r_timer, r_dly_timer)
+    p_fsm : process(r_fsm, s_init_en, r_timer, r_dly_timer, s_up, s_down, i_beat)
     begin
         s_fsm <= r_fsm; --! Default assignment to hold the state
         case r_fsm is
@@ -133,9 +135,9 @@ begin
                     s_fsm <= WAIT_INIT; --! If initialization is disabled, go back to WAIT_INIT
                 else
                     if (r_timer = unsigned(s_timer_limit)) then
-                        s_fsm <= WANT_1s_OPEN;
+                        s_fsm <= WAIT_1s_CLOSED;
                     else
-                        s_fsm <= FULLY_OPEN; --! Stay in FULLY_OPEN until timer expires
+                        s_fsm <= FULLY_CLOSED; --! Stay in FULLY_CLOSED until timer expires
                     end if;
                 end if;
 
@@ -146,7 +148,7 @@ begin
                     if (r_dly_timer = to_unsigned(g_dly_timer+g_dly_timer, r_dly_timer'length)) then
                         s_fsm <= WAIT_CMD;
                     else
-                        s_fsm <= WAIT_1s_CLOSED; --! Stay in WANT_1s_OPEN until delay timer expires
+                        s_fsm <= WAIT_1s_CLOSED; --! Stay in WAIT_1s_CLOSED until delay timer expires
                     end if;
                 end if;
 
@@ -186,12 +188,23 @@ begin
                         s_fsm <= WAIT_1s_CLOSED;
                     else
                         if (s_up = '1' or s_down = '1') then
-                            s_fsm <= WAIT_1s_CLOSED;
+                            s_fsm <= UP_FULLY_OPEN_NOT;
                         else
                             s_fsm <= UP_FULLY_OPEN; --! Stay in UP_FULLY_OPEN until timer expires
                         end if;
                     end if;
                 end if;
+
+            when UP_FULLY_OPEN_NOT =>
+                if (s_init_en = '0') then
+                    s_fsm <= WAIT_INIT; --! If initialization is disabled, go back to WAIT_INIT
+                else
+                    if (s_up = '0' and s_down = '0') then
+                        s_fsm <= WAIT_1s_CLOSED;
+                    else
+                        s_fsm <= UP_FULLY_OPEN_NOT; --! Stay in UP_FULLY_OPEN until user command is received
+                    end if;
+                end if; 
 
             when UP_USER_OPEN =>
                 if (s_init_en = '0') then
@@ -239,15 +252,26 @@ begin
                     s_fsm <= WAIT_INIT; --! If initialization is disabled, go back to WAIT_INIT
                 else
                     if (r_timer = unsigned(s_timer_limit)) then
-                        s_fsm <= WAIT_CMD;
+                        s_fsm <= WAIT_1s_CLOSED;
                     else
                         if (s_up = '1' or s_down = '1') then
-                            s_fsm <= WAIT_1s_CLOSED;
+                            s_fsm <= UP_FULLY_CLOSED_NOT;
                         else
                             s_fsm <= DOWN_FULLY_CLOSED; --! Stay in DOWN_FULLY_CLOSED until timer expires
                         end if;
                     end if;
                 end if;
+
+            when UP_FULLY_CLOSED_NOT =>
+                if (s_init_en = '0') then
+                    s_fsm <= WAIT_INIT; --! If initialization is disabled, go back to WAIT_INIT
+                else
+                    if (s_up = '0' and s_down = '0') then
+                        s_fsm <= WAIT_1s_CLOSED;
+                    else
+                        s_fsm <= UP_FULLY_CLOSED_NOT; --! Stay in UP_FULLY_CLOSED_NOT until user command is received
+                    end if;
+                end if; 
 
             when DOWN_USER_CLOSED =>
                 if (s_init_en = '0') then
@@ -260,7 +284,7 @@ begin
                             s_fsm <= DOWN_USER_CLOSED; --! Stay in DOWN_USER_CLOSED until timer expires
                         end if;
                     else
-                        s_fsm <= WAIT_1s_CLOSED; --! If user releases the command, go back to DOWN_WAIT
+                        s_fsm <= WAIT_1s_CLOSED; --! If user releases the command, go back to WAIT_1s_CLOSED
                     end if; 
                 end if;
 
@@ -340,6 +364,8 @@ begin
                 end if;
                 s_relay_up <= '1'; --! Activate relay to open the blinds
 
+            when UP_FULLY_OPEN_NOT =>
+
             when UP_USER_OPEN =>
                 if (i_beat = '1') then
                     s_timer <= r_timer - 1; --! Decrement timer in FULLY_OPEN state
@@ -365,6 +391,8 @@ begin
                     s_timer <= r_timer; --! Hold timer value when beat is not active
                 end if;
                 s_relay_down <= '1'; --! Activate relay to close the blinds
+
+            when UP_FULLY_CLOSED_NOT =>
 
             when DOWN_USER_CLOSED =>
                 if (i_beat = '1') then

@@ -94,6 +94,7 @@ begin
         port map (
             i_clk => i_clk,
             i_rst => i_rst,
+            i_beat => s_beat,
             i_addr => s_addr,
             i_we => s_we,
             i_wdata => s_wdata,
@@ -106,6 +107,9 @@ begin
     gen_on_off : for i in 0 to g_N_ON_OFF-1 generate
 
     reley_lights_inst : entity work.reley_lights
+        generic map (
+            g_BASE_ADDR => (g_N_BLINDS * 5) + i
+        )
         port map (
             i_clk => i_clk,
             i_rst => i_rst,

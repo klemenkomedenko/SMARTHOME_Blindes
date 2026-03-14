@@ -14,13 +14,13 @@ if {[file exists work]} {
 }
 vlib work
 vmap work work
-
 # Compile DUT + TB
 # Use -2008 for modern syntax support; TB itself avoids std.env/to_hstring
+vcom -2008 -work work ../rtl/reley_lights/reley_lights.vhd
 vcom -2008 -work work ../rtl/uart/uart.vhd
-vcom -2008 -work work ../rtl/pwm/pwm.vhd
-vcom -2008 -work work ../rtl/pwm/beat.vhd
+vcom -2008 -work work ../rtl/beat/beat.vhd
 vcom -2008 -work work ../rtl/registers/reg.vhd
+vcom -2008 -work work ../rtl/blinds/blinds.vhd
 vcom -2008 -work work ../rtl/arbiter/arbiter.vhd
 vcom -2008 -work work ../rtl/top.vhd
 vlog top_tb.v

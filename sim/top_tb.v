@@ -18,18 +18,35 @@ module top_tb;
     wire o_rx_vld;
     wire o_tx_busy;
 
+    integer blind_1 = 0;
+    integer blind_2 = 5;
+    integer blind_3 = 10;
+    integer blind_4 = 15;
+    integer blind_5 = 20;
+    integer blind_6 = 25;
+    integer blind_7 = 30;
+    integer blind_8 = 35;
+    integer blind_9 = 40;
+    integer blind_10 = 45;
+
     // Instantiate the DUT (replace 'top' with your actual module name)
     top # (
-        .g_CLK_FREQ(30_000_000),
-        .g_BAUD_RATE(1_000_000),
-        .g_BEAT_FREQ(100000)
+    .g_CLK_FREQ(30_000_000),
+    .g_BAUD_RATE(1_000_000),
+    .g_BEAT_FREQ(1_000),
+    .g_N_BLINDS(11),
+    .g_N_ON_OFF(5),
+    .g_timer(100),
+    .g_dly_timer(50)
     )
     top_inst (
         .i_clk(i_clk),
         .i_rst(i_rst),
         .i_rx(i_rx),
         .o_tx(o_tx),
-        .o_pwm(o_pwm)
+        .o_relay_up(),
+        .o_relay_down(),
+        .o_on_off()
     );
 
     uart # (
@@ -59,53 +76,78 @@ module top_tb;
         repeat (40) @(posedge i_clk);
         i_rst = 0;
         repeat (40) @(posedge i_clk);
-        en_init(8'h45); // 'K'
-        read_init();
-        en_pwm(64'h00000000050000f1);
+        send_en_init_timer(blind_1, 16'h0045);
+        send_en_init_timer(blind_2, 16'h0045);
+        send_en_init_timer(blind_3, 16'h0045);
+        send_en_init_timer(blind_4, 16'h0045);
+        send_en_init_timer(blind_5, 16'h0045);
+        send_en_init_timer(blind_6, 16'h0045);
+        send_en_init_timer(blind_7, 16'h0045);
+        send_en_init_timer(blind_8, 16'h0045);
+        send_en_init_timer(blind_9, 16'h0045);
+        send_en_init_timer(blind_10, 16'h0045);
+
+        repeat (11459075) @(posedge i_clk);
+        up_on(blind_1);
+        up_on(blind_2);
         repeat (200) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        inc_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
+        up_off(blind_1);
+        up_off(blind_2);
+        
+        repeat (11459075) @(posedge i_clk);
+        down_on(blind_1);
+        down_on(blind_2);
         repeat (200) @(posedge i_clk);
-        // $stop;        inc_pwm(64'h00000000050000f1);
-        dec_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        dec_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        dec_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        dec_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        dec_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        dec_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        dec_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        dec_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        dec_pwm(64'h00000000050000f1);
-        repeat (1000000) @(posedge i_clk);
-        dec_pwm(64'h00000000050000f1);
+        down_off(blind_1);
+        down_off(blind_2);
+        
+        repeat (11459075) @(posedge i_clk);
+        up_on(blind_1);
+        up_on(blind_2);
+        repeat (2082620) @(posedge i_clk);
+        up_off(blind_1);        
+        up_off(blind_2);        
+        
+        repeat (11459075) @(posedge i_clk);
+        down_on(blind_1);
+        down_on(blind_2);
+        repeat (2082620) @(posedge i_clk);
+        down_off(blind_1);
+        down_off(blind_2);
+
+        // Test user command while opening to stop in the middle
+        repeat (11459075) @(posedge i_clk);
+        up_on(blind_1);
+        up_on(blind_2);
+        repeat (200) @(posedge i_clk);
+        up_off(blind_1);
+        up_off(blind_2);
+
+        repeat (2246114) @(posedge i_clk);
+        up_on(blind_1);
+        up_on(blind_2);
+        repeat (200) @(posedge i_clk);
+        up_off(blind_1);
+        up_off(blind_2);
+
+        // Test user command while opening to stop in the middle
+        repeat (11459075) @(posedge i_clk);
+        down_on(blind_1);
+        down_on(blind_2);
+        repeat (200) @(posedge i_clk);
+        down_off(blind_1);
+        down_off(blind_2);
+
+        repeat (2246114) @(posedge i_clk);
+        down_on(blind_1);
+        down_on(blind_2);
+        repeat (200) @(posedge i_clk);
+        down_off(blind_1);
+        down_off(blind_2);
+
+        relay_on(55);
+        repeat (2246114) @(posedge i_clk);
+        relay_off(55);
     end
 
     task automatic send_uart;
@@ -130,79 +172,123 @@ module top_tb;
         end
     endtask
 
-    task automatic en_pwm;
-        input [63:0] en;
+    task automatic send_en_init_timer;
+        input [7:0] addr;
+        input [15:0] timer;
         begin
-            send_uart(8'h4B);
-            send_uart(8'h02);
-            send_uart(8'h07);
-            send_uart(en[7:0]);
-            send_uart(en[15:8]);
-            send_uart(en[23:16]);
-            send_uart(en[31:24]);
-            send_uart(en[39:32]);
-            send_uart(en[47:40]);
-            send_uart(en[55:48]);
-            send_uart(en[63:56]);
+            send_uart(8'h4B); // Start byte
+            send_uart(addr);   // Command byte
+            send_uart(8'h02);   // Command byte
+            send_uart(timer[7:0]); // Length byte (0 for commands without parameters)
+            send_uart(timer[15:8]); // End byte
+            send_uart(8'h01); 
+            send_uart(8'h0D);// End byte
+        end
+    endtask
+
+    task automatic send_dis_init_timer;
+        input [7:0] addr;
+        begin
+            send_uart(8'h4B); // Start byte
+            send_uart(addr);   // Command byte
+            send_uart(8'h00); // End byte
             send_uart(8'h0D);
         end
     endtask
 
-    task automatic inc_pwm;
-        input [63:0] inc;
+    task automatic up_on;
+        input [7:0] addr;
         begin
-            send_uart(8'h4B);
-            send_uart(8'h0A);
-            send_uart(8'h07);
-            send_uart(inc[7:0]);
-            send_uart(inc[15:8]);
-            send_uart(inc[23:16]);
-            send_uart(inc[31:24]);
-            send_uart(inc[39:32]);
-            send_uart(inc[47:40]);
-            send_uart(inc[55:48]);
-            send_uart(inc[63:56]);
-            send_uart(8'h0D);
+            send_uart(8'h4B); // Start byte
+            send_uart(addr+3);   // Command byte
+            send_uart(8'h00);   // Command byte
+            send_uart(8'h01); // Length byte (0 for commands without parameters)
+            send_uart(8'h0D);// End byte
         end
     endtask
 
-    task automatic dec_pwm;
-        input [63:0] dec;
+    task automatic up_off;
+        input [7:0] addr;
         begin
-            send_uart(8'h4B);
-            send_uart(8'h12);
-            send_uart(8'h07);
-            send_uart(dec[7:0]);
-            send_uart(dec[15:8]);
-            send_uart(dec[23:16]);
-            send_uart(dec[31:24]);
-            send_uart(dec[39:32]);
-            send_uart(dec[47:40]);
-            send_uart(dec[55:48]);
-            send_uart(dec[63:56]);
-            send_uart(8'h0D);
+            send_uart(8'h4B); // Start byte
+            send_uart(addr+3);   // Command byte
+            send_uart(8'h00);   // Command byte
+            send_uart(8'h00); // Length byte (0 for commands without parameters)
+            send_uart(8'h0D);// End byte
         end
     endtask
 
-    task automatic en_init;
-        input [7:0] init_val;
+    task automatic down_on;
+        input [7:0] addr;
         begin
-            send_uart(8'h4B);
-            send_uart(8'h00);
-            send_uart(8'h00);
-            send_uart(init_val);
-            send_uart(8'h0D);
+            send_uart(8'h4B); // Start byte
+            send_uart(addr+4);   // Command byte
+            send_uart(8'h00);   // Command byte
+            send_uart(8'h01); // Length byte (0 for commands without parameters)
+            send_uart(8'h0D);// End byte
         end
     endtask
 
-    task automatic read_init;
+    task automatic down_off;
+        input [7:0] addr;
         begin
-            send_uart(8'hB4);
-            send_uart(8'h00);
-            send_uart(8'h00);
-            fatch_init(0); // Expecting 8 bytes of data
+            send_uart(8'h4B); // Start byte
+            send_uart(addr+4);   // Command byte
+            send_uart(8'h00);   // Command byte
+            send_uart(8'h00); // Length byte (0 for commands without parameters)
+            send_uart(8'h0D);// End byte
         end
     endtask
+
+
+
+    task automatic on_on;
+        input [7:0] addr;
+        begin
+            send_uart(8'h4B); // Start byte
+            send_uart(addr);   // Command byte
+            send_uart(8'h00);   // Command byte
+            send_uart(8'h01); // Length byte (0 for commands without parameters)
+            send_uart(8'h0D);// End byte
+        end
+    endtask
+
+
+    task automatic on_off;
+        input [7:0] addr;
+        begin
+            send_uart(8'h4B); // Start byte
+            send_uart(addr);   // Command byte
+            send_uart(8'h00);   // Command byte
+            send_uart(8'h01); // Length byte (0 for commands without parameters)
+            send_uart(8'h0D);// End byte
+        end
+    endtask
+
+
+
+    task automatic relay_on;
+        input [7:0] addr;
+        begin
+            send_uart(8'h4B); // Start byte
+            send_uart(addr);   // Command byte
+            send_uart(8'h00);   // Length byte (0 for commands without parameters)
+            send_uart(8'h01); // Length byte (0 for commands without parameters)
+            send_uart(8'h0D);// End byte
+        end
+    endtask
+
+    task automatic relay_off;
+        input [7:0] addr;
+        begin
+            send_uart(8'h4B); // Start byte
+            send_uart(addr);   // Command byte
+            send_uart(8'h00);   // Length byte (0 for commands without parameters)
+            send_uart(8'h01); // Length byte (0 for commands without parameters)
+            send_uart(8'h0D);// End byte
+        end
+    endtask
+
 
 
     reg [7:0] rx_uart_data;

@@ -5,6 +5,7 @@ use ieee.math_real.all;
 
 
 entity reley_lights is
+    generic(g_BASE_ADDR : integer := 0); --! Base address for the relay control register
     port (
         i_clk   : in std_logic;
         i_rst   : in std_logic;
@@ -28,7 +29,7 @@ begin
         if i_rst = '1' then
             r_relay_state <= '0'; --! Reset the relay state to off
         elsif rising_edge(i_clk) then
-            if i_we = '1' and i_addr = x"00" and i_wdata(0) = '1' then --! Check for write enable and correct address
+            if i_we = '1' and i_addr = std_logic_vector(to_unsigned(g_BASE_ADDR, 8)) and i_wdata(0) = '1' then --! Check for write enable and correct address
                 r_relay_state <= not(r_relay_state); --! Update the relay state based on the least significant bit of the write data
             end if;
         end if;
