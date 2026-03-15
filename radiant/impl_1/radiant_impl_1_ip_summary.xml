@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LatticeIPSummary>
+    <IpInfo IP_Module_Name="clk_osc" IP_Name="OSC" License_Feature="-" License_Status="-" Vendor="latticesemi.com" Version="1.4.0" Vlnv="latticesemi.com:module:osc:1.4.0"/>
+    <IpInfo IP_Module_Name="clk_pll" IP_Name="PLL" License_Feature="-" License_Status="-" Vendor="latticesemi.com" Version="1.9.1" Vlnv="latticesemi.com:module:pll:1.9.1"/>
+</LatticeIPSummary>

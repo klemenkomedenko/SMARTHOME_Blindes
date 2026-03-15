@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RadiantProject version="4.2" radiant="2025.2.0.48.0" title="radiant" device="LFMXO5-25-9BBG256C" performance_grade="9_High-Performance_1.0V" family_int="jd5f00" device_int="jd5f25" package_int="BBG256" operation_int="COM" speed_int="12" default_implementation="impl_1">
+    <Options/>
+    <Implementation title="impl_1" dir="impl_1" description="impl_1" synthesis="synplify" default_strategy="Strategy1">
+        <Options def_top="uart"/>
+        <Source name="../rtl/uart/uart.vhd" type="VHDL" type_short="VHDL">
+            <Options top_module="uart"/>
+        </Source>
+        <Source name="../rtl/uart/uart_tb.vhd" type="VHDL" type_short="VHDL" syn_sim="SimOnly">
+            <Options/>
+        </Source>
+        <Source name="uart_sim/uart_sim.spf" type="Simulation Project File" type_short="SPF">
+            <Options/>
+        </Source>
+    </Implementation>
+    <Strategy name="Strategy1" file="radiant1.sty"/>
+</RadiantProject>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BaliMessageLog>
+    <Task name="Synthesis">
+        <Message>
+            <ID>2012213</ID>
+            <Severity>4096</Severity>
+            <Dynamic>CD289 :&quot;C:\mystuff\lights_rtl\SMARTHOME_Light\rtl\registers\reg.vhd&quot;:107:70:107:75|Expecting constant expression</Dynamic>
+            <Navigation>CD289</Navigation>
+            <Navigation>C:\mystuff\lights_rtl\SMARTHOME_Light\rtl\registers\reg.vhd</Navigation>
+            <Navigation>107</Navigation>
+            <Navigation>70</Navigation>
+            <Navigation>107</Navigation>
+            <Navigation>75</Navigation>
+            <Navigation>Expecting constant expression</Navigation>
+        </Message>
+    </Task>
+</BaliMessageLog>

@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<RadiantModule architecture="jd5f00" date="2026 03 14 13:19:55" device="LFMXO5-25" device_int="jd5f25" display_module="OSC" display_vendor="latticesemi.com" family="LFMXO5" gen_platform="Radiant" gen_platform_version="2025.2.0.48.0" generator="ipgen" library="module" module="osc" name="clk_osc" operation="Commercial" package="BBG256" package_int="BBG256" partnumber="LFMXO5-25-9BBG256C" source_format="Verilog" speed="9_High-Performance_1.0V" speed_int="12" vendor="latticesemi.com" version="1.4.0">
+ <Package>
+  <File modified="2026 03 14 13:19:55" name="rtl/clk_osc_bb.v" type="black_box_verilog"/>
+  <File modified="2026 03 14 13:19:55" name="clk_osc.cfg" type="cfg"/>
+  <File modified="2026 03 14 13:19:55" name="misc/clk_osc_tmpl.v" type="template_verilog"/>
+  <File modified="2026 03 14 13:19:55" name="misc/clk_osc_tmpl.vhd" type="template_vhdl"/>
+  <File modified="2026 03 14 13:19:55" name="rtl/clk_osc.v" type="top_level_verilog"/>
+  <File modified="2026 03 14 13:19:55" name="constraints/clk_osc.ldc" type="timing_constraints"/>
+  <File modified="2026 03 14 13:19:55" name="testbench/dut_params.v" type="dependency_file"/>
+  <File modified="2026 03 14 13:19:55" name="testbench/dut_inst.v" type="dependency_file"/>
+  <File modified="2026 03 14 13:19:55" name="component.xml" type="IP-XACT_component"/>
+  <File modified="2026 03 14 13:19:55" name="design.xml" type="IP-XACT_design"/>
+  <File modified="2025 10 18 04:21:47" name="testbench/tb_top.v" type="testbench_verilog"/>
+ </Package>
+</RadiantModule>

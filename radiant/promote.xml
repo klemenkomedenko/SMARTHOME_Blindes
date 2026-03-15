@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<userSetting name="C:/mystuff/lights_rtl/SMARTHOME_Light/radiant/promote.xml" version="Diamond (64-bit) 2025.2.0.48.0" date="Sun Mar 15 08:39:57 2026" vendor="Lattice Semiconductor Corporation" >
+  <msg mid="2046010" type="Info" internal="true" />
+  <msg mid="35921251" type="Warning" internal="true" />
+  <msg mid="35911015" type="Info" internal="true" />
+  <msg mid="2046261" type="Error" internal="true" />
+  <msg mid="2046012" type="Info" internal="true" />
+  <msg mid="2046399" type="Info" internal="true" />
+  <msg mid="2046014" type="Info" internal="true" />
+  <msg mid="2046013" type="Info" internal="true" />
+  <msg mid="2043328" type="Info" internal="true" />
+  <msg mid="2045003" type="Info" internal="true" />
+  <msg mid="35911026" type="Warning" internal="true" />
+  <msg mid="2044320" type="Info" internal="true" />
+  <msg mid="2044561" type="Info" internal="true" />
+  <msg mid="2045000" type="Info" internal="true" />
+  <msg mid="2046259" type="Info" internal="true" />
+  <msg mid="2046284" type="Error" internal="true" />
+  <msg mid="2046241" type="Error" internal="true" />
+  <msg mid="2043018" type="Info" internal="true" />
+  <msg mid="2046318" type="Error" internal="true" />
+  <msg mid="2046319" type="Error" internal="true" />
+  <msg mid="2046400" type="Info" internal="true" />
+  <msg mid="2046201" type="Info" internal="true" />
+  <msg mid="35901328" type="Info" internal="true" />
+  <msg mid="35911012" type="Info" internal="true" />
+  <msg mid="35911000" type="Warning" internal="true" />
+  <msg mid="35911001" type="Warning" internal="true" />
+  <msg mid="35931002" type="Warning" internal="true" />
+  <msg mid="35921504" type="Info" internal="true" />
+  <msg mid="35921400" type="Info" internal="true" />
+  <msg mid="35921613" type="Warning" internal="true" />
+</userSetting>
