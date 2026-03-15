@@ -14,9 +14,6 @@ entity top is
         g_dly_timer : integer := 50 --! Default timer value for delay operations
     );
     port (
-        i_clk   : in std_logic; --! Input clock signal for the system
-        i_rst : in std_logic; --! Active high reset signal to initialize the system
-
         i_rx : in std_logic; --! Input signal for UART reception, used to receive data from an external device such as a microcontroller or computer
         o_tx : out std_logic; --! Output signal for UART transmission, used to send data to an external device such as a microcontroller or computer
 
@@ -29,6 +26,12 @@ entity top is
 end entity top;
 
 architecture rtl of top is
+
+    signal s_clk_osc : std_logic; --! Signal for the output of the clock oscillator, which provides the base clock signal for the system
+    signal s_clk_pll : std_logic;  --! Signal for the output of the PLL (Phase-Locked Loop), which is used to generate a stable and precise clock signal for the system based on the input from the clock oscillator
+    signal s_clk_pll_lock : std_logic;  --! Signal indicating whether the PLL has achieved lock, which means it has stabilized and is providing a reliable clock signal
+    signal r_rst : std_logic_vector(7 downto 0); --! Reset signal vector for different modules, each bit can be used to reset a specific module or group of modules
+
     signal s_rx_data : std_logic_vector(7 downto 0); --! Signal for UART received data
     signal s_tx_data : std_logic_vector(7 downto 0); --! Signal for UART transmited data
     signal s_rx_vld : std_logic;
@@ -48,7 +51,42 @@ architecture rtl of top is
     signal s_dec_pwm : std_logic_vector(63 downto 0);
     signal s_beat : std_logic;
 
+    component clk_osc is
+        port(
+            hf_out_en_i: in std_logic;
+            hf_clk_out_o: out std_logic
+        );
+    end component;
+
+    component clk_pll is
+        port(
+            clki_i: in std_logic;
+            clkop_o: out std_logic;
+            lock_o: out std_logic
+        );
+    end component;
+
 begin
+
+    u_clk_osc : clk_osc port map(
+        hf_out_en_i=> '1',
+        hf_clk_out_o=> s_clk_osc
+    );
+
+    u_clk_pll : clk_pll port map(
+        clki_i=> s_clk_osc,
+        clkop_o=> s_clk_pll,
+        lock_o=> s_clk_pll_lock
+    );
+
+    p_rst : process(s_clk_pll, s_clk_pll_lock)
+    begin
+        if s_clk_pll_lock = '0' then
+            r_rst <= (others => '1');
+        elsif rising_edge(s_clk_pll) then
+            r_rst <= r_rst(r_rst'high - 1 downto 0) &'0';
+        end if;
+    end process;
 
     uart_inst : entity work.uart
     generic map (
@@ -56,8 +94,8 @@ begin
         g_BAUD_RATE => g_BAUD_RATE
     )
     port map (
-        i_clk => i_clk,
-        i_rst => i_rst,
+        i_clk => s_clk_pll,
+        i_rst => r_rst(r_rst'high),
         i_rx => i_rx,
         o_tx => o_tx,
         o_rx_data => s_rx_data,
@@ -69,8 +107,8 @@ begin
 
     arbiter_inst : entity work.arbiter
     port map (
-        i_clk => i_clk,
-        i_rst => i_rst,
+        i_clk => s_clk_pll,
+        i_rst => r_rst(r_rst'high),
         o_addr => s_addr,
         o_we => s_we,
         o_wdata => s_wdata,
@@ -92,8 +130,8 @@ begin
             N_BASE_ADDR => i*5
         )
         port map (
-            i_clk => i_clk,
-            i_rst => i_rst,
+            i_clk => s_clk_pll,
+            i_rst => r_rst(r_rst'high),
             i_beat => s_beat,
             i_addr => s_addr,
             i_we => s_we,
@@ -111,8 +149,8 @@ begin
             g_BASE_ADDR => (g_N_BLINDS * 5) + i
         )
         port map (
-            i_clk => i_clk,
-            i_rst => i_rst,
+            i_clk => s_clk_pll,
+            i_rst => r_rst(r_rst'high),
             i_addr => s_addr,
             i_we => s_we,
             i_wdata => s_wdata,
@@ -147,8 +185,8 @@ begin
         g_BEAT_FREQ => g_BEAT_FREQ
     )
     port map (
-        i_clk => i_clk,
-        i_rst => i_rst,
+        i_clk => s_clk_pll,
+        i_rst => r_rst(r_rst'high),
         o_beat => s_beat
     );
 
